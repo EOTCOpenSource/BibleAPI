@@ -40,7 +40,49 @@ The API will start on `http://localhost:3000` by default.
 - `GET /api/books/:identifier/chapters/:chapterNumber` — Get a chapter.
 - `GET /api/books/:identifier/chapters/:chapterNumber/verses/:verseNumber` — Get a verse.
 
-## Notes
+### Lookup endpoint
 
-- Data path is resolved from `src/app.js` as `../data/80-weahadu.json`, fixing prior ENOENT path issues.
-- To change the dataset, update `src/app.js` to point to a different file or make it configurable by env.
+- `GET /api/lookup?ref=<reference>` — Free-text reference lookup for a single verse or a range.
+	- Format: `<book> <chapter>:<verse>` or `<book> <chapter>:<start>-<end>`
+	- The separator can be `:` or the Ethiopic colon `፥`.
+
+Examples:
+
+```sh
+# English
+curl -s "http://localhost:3000/api/lookup?ref=Genesis%201:3"
+curl -s "http://localhost:3000/api/lookup?ref=Leviticus%2010:1-5"
+
+# Amharic (use URL encoding when needed)
+curl -s "http://localhost:3000/api/lookup?ref=%E1%8B%98%E1%8C%B8%2010%3A1"   # ዘጸ 10:1
+curl -s "http://localhost:3000/api/lookup?ref=%E1%8B%98%E1%8C%B8%2010%3A1-5" # ዘጸ 10:1-5
+```
+
+Response (single verse):
+
+```json
+{
+	"reference": "Genesis 1:3",
+	"book": {
+		"book_number": 1,
+		"book_name_am": "ኦሪት ዘፍጥረት",
+		"book_name_en": "Genesis",
+		"book_short_name_am": "ዘፍ",
+		"book_short_name_en": "Gen"
+	},
+	"chapter": 1,
+	"verse": { "verse": 3, "text": "..." }
+}
+```
+
+Response (range):
+
+```json
+{
+	"reference": "Leviticus 10:1-5",
+	"book": { "book_number": 3, "book_name_am": "...", "book_name_en": "Leviticus", "book_short_name_am": "...", "book_short_name_en": "Lev" },
+	"chapter": 10,
+	"verses": [ { "verse": 1, "text": "..." }, { "verse": 2, "text": "..." } ]
+}
+```
+
