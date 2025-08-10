@@ -4,9 +4,11 @@ const { loadBibleData, buildAliasIndex } = require('./services/bibleService');
 // const fs = require('fs');
 const booksRouter = require('./routes/books');
 const lookupRouter = require('./routes/lookup');
+const searchRouter = require('./routes/search');
 const errorHandler = require('./middleware/errorHandler');
 const swaggerUi = require('swagger-ui-express');
 const openapiSpec = require('./docs/openapi');
+const { prepareBibleData } = require('./services/searchService');
 
 function createApp() {
     const app = express();
@@ -21,12 +23,15 @@ function createApp() {
     app.locals.bibleData = bibleData;
     app.locals.aliasIndex = aliasIndex;
 
+    // Prepare search data
+    prepareBibleData(bibleData);
     // Health
     app.get('/health', (req, res) => res.json({ status: 'ok' }));
 
     // Routes
     app.use('/api/books', booksRouter);
     app.use('/api/lookup', lookupRouter);
+    app.use('/api/search', searchRouter);
 
     // OpenAPI JSON
     app.get('/openapi.json', (req, res) => res.json(openapiSpec));

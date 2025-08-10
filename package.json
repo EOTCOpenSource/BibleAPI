@@ -12,6 +12,7 @@
   "description": "",
   "dependencies": {
     "express": "^5.1.0",
+    "fuse.js": "^7.1.0",
     "swagger-ui-express": "^5.0.1"
   },
   "devDependencies": {
