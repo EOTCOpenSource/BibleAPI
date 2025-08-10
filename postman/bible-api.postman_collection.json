@@ -1,0 +1,191 @@
+{
+    "info": {
+        "name": "Ethiopian Orthodox Bible API",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+        "_postman_id": "a16e9a0f-0a8f-4a8c-a7a9-0d9cdb3e80fb"
+    },
+    "item": [
+        {
+            "name": "Root",
+            "request": {
+                "method": "GET",
+                "url": "{{root}}/",
+                "description": "Welcome message"
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "pm.test('Status is 200', () => pm.response.code === 200);",
+                            "pm.test('Body contains Welcome', () => pm.response.text().includes('Welcome'));"
+                        ],
+                        "type": "text/javascript"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Health",
+            "request": {
+                "method": "GET",
+                "url": "{{root}}/health",
+                "description": "Health check"
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "pm.test('Status is 200', () => pm.response.code === 200);",
+                            "pm.test(\"Returns {status:'ok'}\", () => { const b = pm.response.json(); pm.expect(b).to.have.property('status', 'ok'); });"
+                        ],
+                        "type": "text/javascript"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Books - List All",
+            "request": {
+                "method": "GET",
+                "url": "{{baseurl}}/books",
+                "description": "List all books"
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "pm.test('Status is 200', () => pm.response.code === 200);",
+                            "const data = pm.response.json();",
+                            "pm.test('Array response', () => Array.isArray(data));",
+                            "pm.test('Has testament field', () => data[0] && data[0].hasOwnProperty('testament'));",
+                            "if (data.length) { pm.collectionVariables.set('firstBookIdentifier', data[0].book_number || data[0].book_name_en); }"
+                        ],
+                        "type": "text/javascript"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Books - Old Testament",
+            "request": {
+                "method": "GET",
+                "url": "{{baseurl}}/books/old",
+                "description": "List old testament books"
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "pm.test('Status is 200', () => pm.response.code === 200);",
+                            "const data = pm.response.json();",
+                            "pm.test('Array response', () => Array.isArray(data));",
+                            "pm.test('All are old testament', () => data.every(b => b.testament === 'old'));"
+                        ],
+                        "type": "text/javascript"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Books - New Testament",
+            "request": {
+                "method": "GET",
+                "url": "{{baseurl}}/books/new",
+                "description": "List new testament books"
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "pm.test('Status is 200', () => pm.response.code === 200);",
+                            "const data = pm.response.json();",
+                            "pm.test('Array response', () => Array.isArray(data));",
+                            "pm.test('All are new testament', () => data.every(b => b.testament === 'new'));"
+                        ],
+                        "type": "text/javascript"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Book - By Identifier",
+            "request": {
+                "method": "GET",
+                "url": "{{baseurl}}/books/{{firstBookIdentifier}}",
+                "description": "Get one book by number or name"
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "pm.test('Status is 200', () => pm.response.code === 200);",
+                            "const b = pm.response.json();",
+                            "pm.test('Has chapters', () => Array.isArray(b.chapters));",
+                            "if (b.chapters && b.chapters.length) { pm.collectionVariables.set('firstChapterNumber', b.chapters[0].chapter); }"
+                        ],
+                        "type": "text/javascript"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Chapter - By Number",
+            "request": {
+                "method": "GET",
+                "url": "{{baseurl}}/books/{{firstBookIdentifier}}/chapters/{{firstChapterNumber}}",
+                "description": "Get a chapter"
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "pm.test('Status is 200', () => pm.response.code === 200);",
+                            "const c = pm.response.json();",
+                            "pm.test('Has sections', () => Array.isArray(c.sections));",
+                            "if (c.sections && c.sections.length) { const v = c.sections[0].verses && c.sections[0].verses[0]; if (v) { pm.collectionVariables.set('firstVerseNumber', v.verse); } }"
+                        ],
+                        "type": "text/javascript"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Verse - By Number",
+            "request": {
+                "method": "GET",
+                "url": "{{baseurl}}/books/{{firstBookIdentifier}}/chapters/{{firstChapterNumber}}/verses/{{firstVerseNumber}}",
+                "description": "Get a verse"
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "pm.test('Status is 200', () => pm.response.code === 200);",
+                            "const v = pm.response.json();",
+                            "pm.test('Has verse number and text', () => v && typeof v.verse === 'number' && typeof v.text === 'string');"
+                        ],
+                        "type": "text/javascript"
+                    }
+                }
+            ]
+        }
+    ],
+    "variable": [
+        {
+            "key": "baseurl",
+            "value": "http://localhost:3000/api"
+        },
+        {
+            "key": "root",
+            "value": "http://localhost:3000"
+        }
+    ]
+}
