@@ -1,4 +1,4 @@
-const { findBook, normalizeAmharicName } = require('../services/bibleService');
+const { findBookByAlias } = require('../services/bibleService');
 
 // Parse reference strings like: "ዘጸ 30፥1" or "Genesis 30:1" and ranges like "10:1-5"
 // Returns { identifier, chapterNumber, verseStart, verseEnd? } or null
@@ -27,7 +27,8 @@ function lookupRef(req, res) {
 
     const { identifier, chapterNumber, verseStart, verseEnd } = parsed;
     const bibleData = req.app.locals.bibleData;
-    const book = findBook(bibleData, normalizeAmharicName(identifier));
+    const aliasIndex = req.app.locals.aliasIndex;
+    const book = findBookByAlias(bibleData, aliasIndex, identifier);
     if (!book) return res.status(404).json({ message: 'Book not found.' });
 
     const chapter = (book.chapters || []).find(c => c.chapter === chapterNumber);

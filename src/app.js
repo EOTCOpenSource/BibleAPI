@@ -1,6 +1,6 @@
 const express = require('express');
 const path = require('path');
-const { loadBibleData } = require('./services/bibleService');
+const { loadBibleData, buildAliasIndex } = require('./services/bibleService');
 // const fs = require('fs');
 const booksRouter = require('./routes/books');
 const lookupRouter = require('./routes/lookup');
@@ -17,7 +17,9 @@ function createApp() {
     // Load data once and attach to app.locals
     const dataFilePath = path.join(__dirname, '..', 'data', '80-weahadu.json');
     const bibleData = loadBibleData(dataFilePath);
+    const aliasIndex = buildAliasIndex(bibleData);
     app.locals.bibleData = bibleData;
+    app.locals.aliasIndex = aliasIndex;
 
     // Health
     app.get('/health', (req, res) => res.json({ status: 'ok' }));
