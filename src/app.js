@@ -3,6 +3,7 @@ const path = require('path');
 const { loadBibleData } = require('./services/bibleService');
 // const fs = require('fs');
 const booksRouter = require('./routes/books');
+const lookupRouter = require('./routes/lookup');
 const errorHandler = require('./middleware/errorHandler');
 const swaggerUi = require('swagger-ui-express');
 const openapiSpec = require('./docs/openapi');
@@ -23,6 +24,7 @@ function createApp() {
 
     // Routes
     app.use('/api/books', booksRouter);
+    app.use('/api/lookup', lookupRouter);
 
     // OpenAPI JSON
     app.get('/openapi.json', (req, res) => res.json(openapiSpec));

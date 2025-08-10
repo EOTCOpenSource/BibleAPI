@@ -134,6 +134,60 @@ module.exports = {
                 },
             },
         },
+        '/api/lookup': {
+            get: {
+                tags: ['Books'],
+                summary: 'Lookup a verse or a range by a human-readable reference string',
+                description: 'Accepts a ref like "Genesis 30:1" or "ዘጸ 30፥1" (Geez colon ፥ or :) and ranges like "Leviticus 10:1-5" or "ዘሌዋውያን 10፥1-5".',
+                parameters: [
+                    {
+                        name: 'ref',
+                        in: 'query',
+                        required: true,
+                        schema: { type: 'string' },
+                        examples: {
+                            english: { summary: 'English', value: 'Exodus 30:1' },
+                            amharicShort: { summary: 'Amharic short', value: 'ዘጸ 30፥1' },
+                            amharicAlt: { summary: 'Amharic alt', value: 'ዘፀ 30፥1' },
+                            amharicFull: { summary: 'Amharic full', value: 'ዘጸአት 30፥1' },
+                            rangeEn: { summary: 'English range', value: 'Leviticus 10:1-5' },
+                            rangeAm: { summary: 'Amharic range', value: 'ዘሌዋውያን 10፥1-5' },
+                        },
+                    },
+                ],
+                responses: {
+                    200: {
+                        description: 'Matched verse or range with metadata',
+                        content: {
+                            'application/json': {
+                                oneOf: [
+                                    {
+                                        type: 'object',
+                                        properties: {
+                                            reference: { type: 'string' },
+                                            book: { $ref: '#/components/schemas/BookSummary' },
+                                            chapter: { type: 'integer' },
+                                            verse: { $ref: '#/components/schemas/Verse' },
+                                        },
+                                    },
+                                    {
+                                        type: 'object',
+                                        properties: {
+                                            reference: { type: 'string' },
+                                            book: { $ref: '#/components/schemas/BookSummary' },
+                                            chapter: { type: 'integer' },
+                                            verses: { type: 'array', items: { $ref: '#/components/schemas/Verse' } },
+                                        },
+                                    },
+                                ],
+                            },
+                        },
+                    },
+                    400: { description: 'Invalid reference format' },
+                    404: { description: 'Book, chapter, or verse not found' },
+                },
+            },
+        },
     },
     components: {
         parameters: {
